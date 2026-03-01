@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的影评生成器 - 终极完全体</title>
+    <title>影评生成器1.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
@@ -120,9 +120,9 @@
         <h2>🎬 影评数据控制台</h2>
         
         <label>1. 输入影视名称</label>
-        <input type="text" id="input-title" placeholder="例如：大明王朝1566" oninput="updateText()">
+        <input type="text" id="input-title" placeholder="例如：萤火虫之墓" oninput="updateText()">
 
-        <label>2. 填入 API Key 并抓取 (只需填一次)</label>
+        <label>2. 填入 API Key 并抓取</label>
         <input type="password" id="input-api-key" placeholder="输入 TMDB API Key">
         <button onclick="fetchTMDB()">🌐 自动抓取海报及数据</button>
 
@@ -265,3 +265,4 @@
     </script>
 </body>
 </html>
+
