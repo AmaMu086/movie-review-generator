@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的影评生成器 - 完美无痕版</title>
+    <title>我的影评生成器 - 终极完全体</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
@@ -71,8 +71,14 @@
         button:active { transform: translateY(2px); }
 
         .export-btns { display: flex; gap: 12px; margin-top: 24px; }
-        .export-btns button:first-child { background-color: var(--success-color); }
-        .export-btns button:first-child:hover { background-color: #33ffb3; box-shadow: 0 0 15px rgba(0, 255, 157, 0.4); }
+        
+        /* 导出按钮特殊样式 */
+        .btn-export { background-color: var(--success-color); flex: 2; }
+        .btn-export:hover { background-color: #33ffb3; box-shadow: 0 0 15px rgba(0, 255, 157, 0.4); }
+        
+        /* 清空按钮特殊样式 */
+        .btn-reset { background-color: #2c2f38; color: var(--text-main); flex: 1; }
+        .btn-reset:hover { background-color: var(--error-color); color: white; box-shadow: 0 0 15px rgba(255, 85, 85, 0.4); }
         
         .preview-box {
             background: linear-gradient(135deg, var(--card-bg) 0%, #0b0c10 100%);
@@ -114,9 +120,9 @@
         <h2>🎬 影评数据控制台</h2>
         
         <label>1. 输入影视名称</label>
-        <input type="text" id="input-title" placeholder="例如：萤火虫之墓 (Grave of the Fireflies)" oninput="updateText()">
+        <input type="text" id="input-title" placeholder="例如：大明王朝1566" oninput="updateText()">
 
-        <label>2. 填入 API Key 并抓取</label>
+        <label>2. 填入 API Key 并抓取 (只需填一次)</label>
         <input type="password" id="input-api-key" placeholder="输入 TMDB API Key">
         <button onclick="fetchTMDB()">🌐 自动抓取海报及数据</button>
 
@@ -135,7 +141,8 @@
         <input type="number" id="input-font-size" value="16" min="12" max="36" oninput="updateText()">
 
         <div class="export-btns">
-            <button onclick="exportPNG()">💾 导出为图片</button>
+            <button class="btn-export" onclick="exportPNG()">💾 导出为图片</button>
+            <button class="btn-reset" onclick="resetForm()">🗑️ 清空重置</button>
         </div>
     </div>
 
@@ -157,6 +164,14 @@
     </div>
 
     <script>
+        // 网页加载完毕时，自动去“储物柜”找 Key
+        window.onload = function() {
+            const savedKey = localStorage.getItem('my_tmdb_api_key');
+            if (savedKey) {
+                document.getElementById('input-api-key').value = savedKey;
+            }
+        };
+
         function updateText() {
             document.getElementById('preview-title').innerText = document.getElementById('input-title').value || '等待输入信号...';
             document.getElementById('preview-review').innerText = document.getElementById('input-review').value || '左侧输入数据后将在此显示...';
@@ -171,6 +186,9 @@
             const posterContainer = document.getElementById('poster-container');
             
             if (!title || !apiKey) return alert('请输入电影名称和 API Key！');
+
+            // 只要点抓取，就把 Key 存进浏览器的“储物柜”里
+            localStorage.setItem('my_tmdb_api_key', apiKey);
 
             logDiv.style.display = 'block';
             logDiv.style.color = 'var(--accent-color)';
@@ -214,7 +232,6 @@
         }
 
         function exportPNG() {
-            // 截图前，把日志区域隐藏掉
             const logDiv = document.getElementById('preview-log');
             const originalDisplay = logDiv.style.display;
             logDiv.style.display = 'none';
@@ -229,9 +246,21 @@
             }).catch(e => {
                 alert("导出失败：" + e.message);
             }).finally(() => {
-                // 截图完成后，不管成功还是失败，都把日志区域恢复显示
                 logDiv.style.display = originalDisplay;
             });
+        }
+
+        // 新增的一键清空功能
+        function resetForm() {
+            if (confirm("确定要清空当前的影评内容吗？\n（不用担心，API Key 和排版设置会自动保留）")) {
+                document.getElementById('input-title').value = '';
+                document.getElementById('input-review').value = '';
+                document.getElementById('tmdb-meta-box').style.display = 'none';
+                document.getElementById('poster-container').innerHTML = '';
+                document.getElementById('preview-log').style.display = 'none';
+                // 重新触发一次文字更新，让预览区变回默认状态
+                updateText();
+            }
         }
     </script>
 </body>
