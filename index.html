@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的影评生成器 - Pro Max 终极版</title>
+    <title>影评生成器 1.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
@@ -151,7 +151,7 @@
     <div class="panel controls">
         <h2>🎬 影评数据控制台</h2>
         
-        <label>1. 输入 API Key (只需填一次)</label>
+        <label>1. 输入 API Key</label>
         <input type="password" id="input-api-key" placeholder="输入 TMDB API Key">
 
         <label>2. 检索电影并选择</label>
@@ -186,7 +186,7 @@
         </div>
 
         <div class="export-btns">
-            <button class="btn-export" onclick="exportPNG()">💾 生成高清海报 (1800×2283)</button>
+            <button class="btn-export" onclick="exportPNG()">💾 生成高清海报</button>
             <button class="btn-reset" onclick="resetForm()">🗑️ 清空重置</button>
         </div>
     </div>
@@ -230,7 +230,7 @@
 
         function updateText() {
             document.getElementById('preview-title').innerText = document.getElementById('input-title').value || '等待输入信号...';
-            document.getElementById('preview-review').innerText = document.getElementById('input-review').value || '左侧输入数据后将在此显示...';
+            document.getElementById('preview-review').innerText = document.getElementById('input-review').value || '输入数据后将在此显示...';
             
             document.getElementById('capture-area').style.fontFamily = document.getElementById('input-font-family').value;
             // 分别绑定标题字号和正文字号
@@ -388,3 +388,4 @@
     </script>
 </body>
 </html>
+
