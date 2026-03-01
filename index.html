@@ -144,7 +144,7 @@
         <label>1. 输入影视名称</label>
         <input type="text" id="input-title" placeholder="例如：萤火虫之墓 (Grave of the Fireflies)" oninput="updateText()">
 
-        <label>2. 填入 API Key 并抓取 (只需填一次)</label>
+        <label>2. 填入 API Key</label>
         <input type="password" id="input-api-key" placeholder="输入 TMDB API Key">
         <button onclick="fetchTMDB()">🌐 自动抓取海报及数据</button>
 
@@ -180,7 +180,7 @@
                 </div>
             </div>
 
-            <div id="preview-review">左侧输入数据后将在此显示...</div>
+            <div id="preview-review">输入影评后将在此显示...</div>
             <div id="preview-log"></div>
         </div>
     </div>
@@ -195,7 +195,7 @@
 
         function updateText() {
             document.getElementById('preview-title').innerText = document.getElementById('input-title').value || '等待输入信号...';
-            document.getElementById('preview-review').innerText = document.getElementById('input-review').value || '左侧输入数据后将在此显示...';
+            document.getElementById('preview-review').innerText = document.getElementById('input-review').value || '输入影评后将在此显示...';
             document.getElementById('capture-area').style.fontFamily = document.getElementById('input-font-family').value;
             document.getElementById('preview-review').style.fontSize = document.getElementById('input-font-size').value + 'px';
         }
@@ -283,3 +283,4 @@
     </script>
 </body>
 </html>
+
