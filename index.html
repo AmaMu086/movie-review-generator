@@ -192,13 +192,11 @@
     </div>
 
     <script>
-        // 自动读取储物柜里的 Key
         window.onload = function() {
             const savedKey = localStorage.getItem('my_tmdb_api_key');
             if (savedKey) document.getElementById('input-api-key').value = savedKey;
         };
 
-        // 点击页面空白处关闭下拉框
         document.addEventListener('click', function(event) {
             const dropdown = document.getElementById('search-dropdown');
             const input = document.getElementById('input-title');
@@ -214,7 +212,6 @@
             document.getElementById('preview-review').style.fontSize = document.getElementById('input-font-size').value + 'px';
         }
 
-        // --- 核心改动 1：获取电影列表并展示下拉菜单 ---
         async function fetchTMDBSearch() {
             const title = document.getElementById('input-title').value;
             const apiKey = document.getElementById('input-api-key').value;
@@ -236,17 +233,16 @@
                 
                 const data = await response.json();
                 
-                dropdown.innerHTML = ''; // 清空加载提示
+                dropdown.innerHTML = ''; 
                 
                 if (data.results && data.results.length > 0) {
-                    // 只展示前 8 个匹配结果，防止列表过长
                     const topResults = data.results.slice(0, 8);
                     
                     topResults.forEach(movie => {
                         const li = document.createElement('li');
                         li.className = 'dropdown-item';
                         const year = movie.release_date ? movie.release_date.substring(0, 4) : '未知年份';
-                        const posterSrc = movie.poster_path ? `https://image.tmdb.org/t/p/w92${movie.poster_path}` : 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='; // 透明占位图
+                        const posterSrc = movie.poster_path ? `https://image.tmdb.org/t/p/w92${movie.poster_path}` : 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
                         
                         li.innerHTML = `
                             <img src="${posterSrc}" alt="thumb" onerror="this.style.opacity='0'">
@@ -256,7 +252,6 @@
                             </div>
                         `;
                         
-                        // 当用户点击某一项时，选中它！
                         li.onclick = () => selectMovie(movie);
                         dropdown.appendChild(li);
                     });
@@ -268,10 +263,9 @@
             }
         }
 
-        // 用户在下拉列表中选中了一部电影后的逻辑
         function selectMovie(movie) {
             document.getElementById('search-dropdown').style.display = 'none';
-            document.getElementById('input-title').value = movie.title; // 自动填充精准名称
+            document.getElementById('input-title').value = movie.title; 
             
             const posterContainer = document.getElementById('poster-container');
             const logDiv = document.getElementById('preview-log');
@@ -295,10 +289,9 @@
             logDiv.style.color = 'var(--accent-color)';
             logDiv.innerHTML = `> 精准匹配成功: ${movie.title} (ID: ${movie.id})`;
             
-            updateText(); // 立即更新排版
+            updateText(); 
         }
 
-        // --- 核心改动 2：强制输出 1800x2283 分辨率的魔术 ---
         function exportPNG() {
             const logDiv = document.getElementById('preview-log');
             const originalDisplay = logDiv.style.display;
@@ -306,26 +299,23 @@
 
             const captureArea = document.getElementById('capture-area');
 
-            // 通过 onclone 方法，在后台临时调整结构，绝不影响你在屏幕上看到的前台 UI
             html2canvas(captureArea, { 
-                scale: 3, // 宽度 600 * 3 = 1800，高度 761 * 3 = 2283
+                scale: 3, 
                 backgroundColor: "#0f1115", 
                 useCORS: true, 
                 allowTaint: false,
-                width: 600,  // 强制锁死画布宽度
-                height: 761, // 强制锁死画布高度
+                width: 600,  
+                height: 761, 
                 windowWidth: 600,
                 onclone: (clonedDoc) => {
                     const el = clonedDoc.getElementById('capture-area');
                     
-                    // 把卡片扔到一个极其干净、无干扰的虚拟 body 里面
                     clonedDoc.body.innerHTML = '';
                     clonedDoc.body.style.margin = '0';
                     clonedDoc.body.style.padding = '0';
                     clonedDoc.body.style.background = '#0f1115';
                     clonedDoc.body.appendChild(el);
 
-                    // 给克隆体施加“强制锁死尺寸”魔法
                     el.style.position = 'absolute';
                     el.style.top = '0';
                     el.style.left = '0';
@@ -334,13 +324,12 @@
                     el.style.minHeight = '761px';
                     el.style.maxHeight = '761px';
                     el.style.margin = '0';
-                    el.style.borderRadius = '0'; // 导出图片不需要圆角，全画幅拉满！
+                    el.style.borderRadius = '0'; 
                     el.style.border = 'none';
                     el.style.padding = '50px 40px'; 
                     el.style.boxSizing = 'border-box';
-                    el.style.overflow = 'hidden'; // 如果字写得太多，超过 2283 高度就会隐藏，保证尺寸绝对不崩
+                    el.style.overflow = 'hidden'; 
 
-                    // 防止海报过大把文字挤出去
                     const poster = clonedDoc.getElementById('tmdb-poster-img');
                     if (poster) {
                         poster.style.maxHeight = '400px';
@@ -350,7 +339,7 @@
             }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = `我的影评海报_1800x2283.png`;
-                link.href = canvas.toDataURL('image/png', 1.0); // 确保最高质量输出
+                link.href = canvas.toDataURL('image/png', 1.0); 
                 link.click();
             }).catch(e => {
                 alert("导出失败：" + e.message);
@@ -372,379 +361,4 @@
     </script>
 </body>
 </html>
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>影评生成器 3.0</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    
-    <style>
-        :root {
-            --bg-color: #0f1115;
-            --card-bg: #1a1d24;
-            --accent-color: #00d2ff;
-            --text-main: #ffffff;
-            --text-secondary: #a0a3b1;
-            --success-color: #00ff9d;
-            --warning-color: #ffcc00;
-            --error-color: #ff5555;
-            --input-bg: #0b0c10;
-        }
-
-        body {
-            font-family: 'PingFang SC', 'Microsoft YaHei', -apple-system, sans-serif;
-            background: radial-gradient(circle at top right, #232836 0%, var(--bg-color) 100%);
-            color: var(--text-main);
-            margin: 0;
-            padding: 40px 20px;
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            min-height: 100vh;
-            box-sizing: border-box;
-        }
-
-        .panel {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            box-sizing: border-box;
-        }
-
-        .controls { flex: 1; max-width: 450px; }
-        .preview-container { flex: 1; max-width: 600px; display: flex; flex-direction: column; }
-
-        h2 { 
-            margin-top: 0; font-size: 1.8rem; 
-            border-left: 4px solid var(--accent-color);
-            padding-left: 15px; margin-bottom: 24px; color: var(--text-main);
-        }
-
-        label { display: block; margin-top: 16px; margin-bottom: 8px; font-size: 14px; color: var(--text-secondary); }
-        
-        input[type="text"], input[type="password"], textarea, select, input[type="number"] {
-            width: 100%; padding: 14px 16px; background-color: var(--input-bg);
-            border: 1px solid #333; border-radius: 8px; font-size: 15px; color: var(--text-main);
-            box-sizing: border-box; transition: all 0.3s ease; outline: none;
-        }
-
-        input:focus, textarea:focus, select:focus { border-color: var(--accent-color); box-shadow: 0 0 10px rgba(0, 210, 255, 0.2); }
-        textarea { height: 120px; resize: none; }
-
-        button {
-            margin-top: 20px; padding: 14px 20px; background-color: var(--accent-color);
-            color: #000; font-size: 15px; font-weight: bold; border: none; border-radius: 8px;
-            cursor: pointer; transition: all 0.2s; width: 100%;
-        }
-        button:hover { background-color: #33e0ff; box-shadow: 0 0 15px rgba(0, 210, 255, 0.4); }
-        button:active { transform: translateY(2px); }
-
-        .export-btns { display: flex; gap: 12px; margin-top: 24px; }
-        .btn-export { background-color: var(--success-color); flex: 2; }
-        .btn-export:hover { background-color: #33ffb3; box-shadow: 0 0 15px rgba(0, 255, 157, 0.4); }
-        .btn-reset { background-color: #2c2f38; color: var(--text-main); flex: 1; }
-        .btn-reset:hover { background-color: var(--error-color); color: white; box-shadow: 0 0 15px rgba(255, 85, 85, 0.4); }
-        
-        /* 智能搜索下拉框样式 */
-        .dropdown-container { position: relative; }
-        .dropdown-list {
-            position: absolute; top: calc(100% + 8px); left: 0; width: 100%;
-            background: #1a1d24; border: 1px solid rgba(0,210,255,0.3);
-            border-radius: 12px; max-height: 350px; overflow-y: auto;
-            z-index: 999; display: none; margin: 0; padding: 8px; list-style: none;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.8);
-        }
-        .dropdown-item {
-            padding: 10px; border-radius: 8px; cursor: pointer;
-            display: flex; align-items: center; gap: 15px; transition: 0.2s;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        .dropdown-item:last-child { border-bottom: none; }
-        .dropdown-item:hover { background: rgba(0,210,255,0.15); transform: translateX(5px); }
-        .dropdown-item img { width: 45px; height: 68px; object-fit: cover; border-radius: 6px; background: #333; }
-        .dropdown-info { display: flex; flex-direction: column; gap: 5px; }
-        .dropdown-title { font-size: 15px; font-weight: bold; color: #fff; line-height: 1.2; }
-        .dropdown-desc { font-size: 12px; color: var(--accent-color); }
-
-        .preview-box {
-            background: linear-gradient(135deg, var(--card-bg) 0%, #0b0c10 100%);
-            border-radius: 16px; padding: 40px; border: 1px solid rgba(0, 210, 255, 0.2);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6); min-height: 500px;
-            display: flex; flex-direction: column;
-        }
-
-        #preview-title { 
-            font-size: 36px; font-weight: bold; margin-bottom: 20px; 
-            color: #ffffff; text-shadow: 0 0 10px rgba(0, 210, 255, 0.8), 0 0 20px rgba(0, 210, 255, 0.4); 
-            text-align: center; line-height: 1.3;
-        }
-
-        #tmdb-meta-box { display: none; margin-bottom: 30px; text-align: center; }
-        
-        .poster-image { 
-            width: 100%; max-width: 320px; border-radius: 12px; margin: 0 auto 15px auto; 
-            display: block; box-shadow: 0 8px 24px rgba(0, 210, 255, 0.25); border: 1px solid rgba(0, 210, 255, 0.3);
-        }
-
-        .meta-tags { display: flex; justify-content: center; gap: 15px; font-size: 13px; color: var(--text-secondary); }
-        .meta-tag { background: rgba(255, 255, 255, 0.05); padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1); }
-        .rating { color: var(--warning-color); font-weight: bold; }
-
-        #preview-review { line-height: 1.8; color: #d1d5db; white-space: pre-wrap; margin-bottom: 30px; flex-grow: 1; }
-        #preview-log { 
-            color: var(--accent-color); font-size: 12px; word-break: break-all; 
-            border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 16px; margin-top: 20px; font-family: monospace; display: none;
-        }
-
-        @media (max-width: 768px) {
-            body { flex-direction: column-reverse; padding: 15px 10px; gap: 20px; }
-            .controls, .preview-container { max-width: 100%; width: 100%; }
-            .preview-box { min-height: auto; padding: 30px 20px; }
-            #preview-title { font-size: 28px; }
-            .export-btns { flex-direction: column; }
-            button { padding: 16px 20px; }
-        }
-    </style>
-</head>
-<body>
-
-    <div class="panel controls">
-        <h2>🎬 影评数据控制台</h2>
-        
-        <label>1. 输入 API Key (只需填一次)</label>
-        <input type="password" id="input-api-key" placeholder="输入 TMDB API Key">
-
-        <label>2. 检索电影并选择</label>
-        <div class="dropdown-container">
-            <input type="text" id="input-title" placeholder="输入影视名称，然后点击下方搜索..." oninput="updateText()">
-            <ul id="search-dropdown" class="dropdown-list"></ul>
-        </div>
-        
-        <button onclick="fetchTMDBSearch()">🔍 搜索电影列表</button>
-
-        <hr style="margin: 30px 0; border: 0; border-top: 1px solid rgba(255,255,255,0.1);">
-
-        <label>3. 编写影评正文</label>
-        <textarea id="input-review" placeholder="写下你的观影感受..." oninput="updateText()"></textarea>
-
-        <label>排版字体</label>
-        <select id="input-font-family" onchange="updateText()">
-            <option value="'PingFang SC', 'Microsoft YaHei', sans-serif">现代无衬线 (推荐)</option>
-            <option value="'SimSun', serif">经典宋体</option>
-            <option value="'KaiTi', serif">文艺楷体</option>
-        </select>
-
-        <label>正文字号 (px)</label>
-        <input type="number" id="input-font-size" value="16" min="12" max="36" oninput="updateText()">
-
-        <div class="export-btns">
-            <button class="btn-export" onclick="exportPNG()">💾 生成标准海报 (1800×2283)</button>
-            <button class="btn-reset" onclick="resetForm()">🗑️ 清空重置</button>
-        </div>
-    </div>
-
-    <div class="preview-container">
-        <div class="preview-box" id="capture-area">
-            <div id="preview-title">等待输入信号...</div>
-            
-            <div id="tmdb-meta-box">
-                <div id="poster-container"></div>
-                <div class="meta-tags">
-                    <span class="meta-tag" id="meta-date">📅 上映: --</span>
-                    <span class="meta-tag rating" id="meta-rating">⭐ 评分: --</span>
-                </div>
-            </div>
-
-            <div id="preview-review">左侧输入数据后将在此显示...</div>
-            <div id="preview-log"></div>
-        </div>
-    </div>
-
-    <script>
-        // 自动读取储物柜里的 Key
-        window.onload = function() {
-            const savedKey = localStorage.getItem('my_tmdb_api_key');
-            if (savedKey) document.getElementById('input-api-key').value = savedKey;
-        };
-
-        // 点击页面空白处关闭下拉框
-        document.addEventListener('click', function(event) {
-            const dropdown = document.getElementById('search-dropdown');
-            const input = document.getElementById('input-title');
-            if (event.target !== input && event.target !== dropdown && !dropdown.contains(event.target)) {
-                dropdown.style.display = 'none';
-            }
-        });
-
-        function updateText() {
-            document.getElementById('preview-title').innerText = document.getElementById('input-title').value || '等待输入信号...';
-            document.getElementById('preview-review').innerText = document.getElementById('input-review').value || '左侧输入数据后将在此显示...';
-            document.getElementById('capture-area').style.fontFamily = document.getElementById('input-font-family').value;
-            document.getElementById('preview-review').style.fontSize = document.getElementById('input-font-size').value + 'px';
-        }
-
-        // --- 核心改动 1：获取电影列表并展示下拉菜单 ---
-        async function fetchTMDBSearch() {
-            const title = document.getElementById('input-title').value;
-            const apiKey = document.getElementById('input-api-key').value;
-            const dropdown = document.getElementById('search-dropdown');
-            const logDiv = document.getElementById('preview-log');
-            
-            if (!title || !apiKey) return alert('请输入电影名称和 API Key！');
-
-            localStorage.setItem('my_tmdb_api_key', apiKey);
-
-            dropdown.innerHTML = '<li class="dropdown-item" style="justify-content:center; color:#a0a3b1;">🔄 正在搜索...</li>';
-            dropdown.style.display = 'block';
-
-            const url = `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(title)}&api_key=${apiKey}&language=zh-CN`;
-
-            try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error(`HTTP 错误代码: ${response.status}`);
-                
-                const data = await response.json();
-                
-                dropdown.innerHTML = ''; // 清空加载提示
-                
-                if (data.results && data.results.length > 0) {
-                    // 只展示前 8 个匹配结果，防止列表过长
-                    const topResults = data.results.slice(0, 8);
-                    
-                    topResults.forEach(movie => {
-                        const li = document.createElement('li');
-                        li.className = 'dropdown-item';
-                        const year = movie.release_date ? movie.release_date.substring(0, 4) : '未知年份';
-                        const posterSrc = movie.poster_path ? `https://image.tmdb.org/t/p/w92${movie.poster_path}` : 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='; // 透明占位图
-                        
-                        li.innerHTML = `
-                            <img src="${posterSrc}" alt="thumb" onerror="this.style.opacity='0'">
-                            <div class="dropdown-info">
-                                <span class="dropdown-title">${movie.title}</span>
-                                <span class="dropdown-desc">${year} | ⭐ ${movie.vote_average ? movie.vote_average.toFixed(1) : '暂无'}</span>
-                            </div>
-                        `;
-                        
-                        // 当用户点击某一项时，选中它！
-                        li.onclick = () => selectMovie(movie);
-                        dropdown.appendChild(li);
-                    });
-                } else {
-                    dropdown.innerHTML = '<li class="dropdown-item" style="justify-content:center; color:#ff5555;">未找到匹配电影</li>';
-                }
-            } catch (error) {
-                dropdown.innerHTML = `<li class="dropdown-item" style="justify-content:center; color:#ff5555;">网络出错: ${error.message}</li>`;
-            }
-        }
-
-        // 用户在下拉列表中选中了一部电影后的逻辑
-        function selectMovie(movie) {
-            document.getElementById('search-dropdown').style.display = 'none';
-            document.getElementById('input-title').value = movie.title; // 自动填充精准名称
-            
-            const posterContainer = document.getElementById('poster-container');
-            const logDiv = document.getElementById('preview-log');
-            
-            document.getElementById('tmdb-meta-box').style.display = 'block';
-            posterContainer.innerHTML = ''; 
-            
-            if (movie.poster_path) {
-                const img = document.createElement('img');
-                img.className = 'poster-image';
-                img.crossOrigin = 'anonymous'; 
-                img.id = 'tmdb-poster-img';
-                img.src = `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
-                posterContainer.appendChild(img); 
-            }
-
-            document.getElementById('meta-date').innerText = `📅 上映: ${movie.release_date || '未知'}`;
-            document.getElementById('meta-rating').innerText = `⭐ 评分: ${movie.vote_average ? movie.vote_average.toFixed(1) : '暂无'}`;
-            
-            logDiv.style.display = 'block';
-            logDiv.style.color = 'var(--accent-color)';
-            logDiv.innerHTML = `> 精准匹配成功: ${movie.title} (ID: ${movie.id})`;
-            
-            updateText(); // 立即更新排版
-        }
-
-        // --- 核心改动 2：强制输出 1800x2283 分辨率的魔术 ---
-        function exportPNG() {
-            const logDiv = document.getElementById('preview-log');
-            const originalDisplay = logDiv.style.display;
-            logDiv.style.display = 'none';
-
-            const captureArea = document.getElementById('capture-area');
-
-            // 通过 onclone 方法，在后台临时调整结构，绝不影响你在屏幕上看到的前台 UI
-            html2canvas(captureArea, { 
-                scale: 3, // 宽度 600 * 3 = 1800，高度 761 * 3 = 2283
-                backgroundColor: "#0f1115", 
-                useCORS: true, 
-                allowTaint: false,
-                width: 600,  // 强制锁死画布宽度
-                height: 761, // 强制锁死画布高度
-                windowWidth: 600,
-                onclone: (clonedDoc) => {
-                    const el = clonedDoc.getElementById('capture-area');
-                    
-                    // 把卡片扔到一个极其干净、无干扰的虚拟 body 里面
-                    clonedDoc.body.innerHTML = '';
-                    clonedDoc.body.style.margin = '0';
-                    clonedDoc.body.style.padding = '0';
-                    clonedDoc.body.style.background = '#0f1115';
-                    clonedDoc.body.appendChild(el);
-
-                    // 给克隆体施加“强制锁死尺寸”魔法
-                    el.style.position = 'absolute';
-                    el.style.top = '0';
-                    el.style.left = '0';
-                    el.style.width = '600px';
-                    el.style.height = '761px';
-                    el.style.minHeight = '761px';
-                    el.style.maxHeight = '761px';
-                    el.style.margin = '0';
-                    el.style.borderRadius = '0'; // 导出图片不需要圆角，全画幅拉满！
-                    el.style.border = 'none';
-                    el.style.padding = '50px 40px'; 
-                    el.style.boxSizing = 'border-box';
-                    el.style.overflow = 'hidden'; // 如果字写得太多，超过 2283 高度就会隐藏，保证尺寸绝对不崩
-
-                    // 防止海报过大把文字挤出去
-                    const poster = clonedDoc.getElementById('tmdb-poster-img');
-                    if (poster) {
-                        poster.style.maxHeight = '400px';
-                        poster.style.objectFit = 'cover';
-                    }
-                }
-            }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `我的影评海报_1800x2283.png`;
-                link.href = canvas.toDataURL('image/png', 1.0); // 确保最高质量输出
-                link.click();
-            }).catch(e => {
-                alert("导出失败：" + e.message);
-            }).finally(() => {
-                logDiv.style.display = originalDisplay;
-            });
-        }
-
-        function resetForm() {
-            if (confirm("确定要清空当前的影评内容吗？\n（API Key 和排版设置会自动保留）")) {
-                document.getElementById('input-title').value = '';
-                document.getElementById('input-review').value = '';
-                document.getElementById('tmdb-meta-box').style.display = 'none';
-                document.getElementById('poster-container').innerHTML = '';
-                document.getElementById('preview-log').style.display = 'none';
-                updateText();
-            }
-        }
-    </script>
-</body>
-</html>
-
 
