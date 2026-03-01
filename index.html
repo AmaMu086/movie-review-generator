@@ -113,7 +113,7 @@
         }
 
         #preview-title { 
-            font-size: 36px; /* 默认36px */
+            font-size: 36px; 
             font-weight: bold; margin-bottom: 20px; 
             color: #ffffff; text-shadow: 0 0 10px rgba(0, 210, 255, 0.8), 0 0 20px rgba(0, 210, 255, 0.4); 
             text-align: center; line-height: 1.3;
@@ -140,7 +140,6 @@
             body { flex-direction: column-reverse; padding: 15px 10px; gap: 20px; }
             .controls, .preview-container { max-width: 100%; width: 100%; }
             .preview-box { min-height: auto; padding: 30px 20px; }
-            /* 取消了原本缩小标题的逻辑，将控制权完全交给你 */
             .export-btns { flex-direction: column; }
             button { padding: 16px 20px; }
         }
@@ -203,7 +202,7 @@
                 </div>
             </div>
 
-            <div id="preview-review">左侧输入数据后将在此显示...</div>
+            <div id="preview-review">输入数据后将在此显示...</div>
             <div id="preview-log"></div>
         </div>
     </div>
@@ -216,7 +215,7 @@
             } catch (e) {
                 console.warn("浏览器禁用了本地存储");
             }
-            updateText(); // 确保加载时字号生效
+            updateText(); 
         };
 
         document.addEventListener('click', function(event) {
@@ -233,7 +232,6 @@
             document.getElementById('preview-review').innerText = document.getElementById('input-review').value || '输入数据后将在此显示...';
             
             document.getElementById('capture-area').style.fontFamily = document.getElementById('input-font-family').value;
-            // 分别绑定标题字号和正文字号
             document.getElementById('preview-title').style.fontSize = document.getElementById('input-title-font-size').value + 'px';
             document.getElementById('preview-review').style.fontSize = document.getElementById('input-font-size').value + 'px';
         }
@@ -322,6 +320,12 @@
             logDiv.style.display = 'none';
 
             const captureArea = document.getElementById('capture-area');
+            
+            // 获取当前电影名字，如果是空的就是“未命名”
+            let movieName = document.getElementById('input-title').value.trim();
+            if (!movieName) {
+                movieName = "未命名";
+            }
 
             html2canvas(captureArea, { 
                 scale: 3, 
@@ -349,7 +353,6 @@
                     el.style.maxHeight = '761px';
                     el.style.margin = '0';
                     
-                    // 【修复核心】：恢复大圆角和蓝色高光边框，呈现悬浮卡片感！
                     el.style.borderRadius = '20px'; 
                     el.style.border = '1px solid rgba(0, 210, 255, 0.2)'; 
                     
@@ -365,7 +368,8 @@
                 }
             }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = `我的影评海报_1800x2283.png`;
+                // 让文件名包含当前搜索的电影名称！
+                link.download = `我的影评海报-${movieName}.png`;
                 link.href = canvas.toDataURL('image/png', 1.0); 
                 link.click();
             }).catch(e => {
@@ -388,4 +392,3 @@
     </script>
 </body>
 </html>
-
