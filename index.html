@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>影评生成器 3.0</title>
+    <title>我的影评生成器 - Pro Max 终极版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    
+    
     <style>
         :root {
             --bg-color: #0f1115;
@@ -45,22 +45,30 @@
         .controls { flex: 1; max-width: 450px; }
         .preview-container { flex: 1; max-width: 600px; display: flex; flex-direction: column; }
 
-        h2 { 
-            margin-top: 0; font-size: 1.8rem; 
+        h2 { 
+            margin-top: 0; font-size: 1.8rem; 
             border-left: 4px solid var(--accent-color);
             padding-left: 15px; margin-bottom: 24px; color: var(--text-main);
         }
 
         label { display: block; margin-top: 16px; margin-bottom: 8px; font-size: 14px; color: var(--text-secondary); }
-        
-        input[type="text"], input[type="password"], textarea, select, input[type="number"] {
+        
+        /* 修复移动端样式：添加 appearance: none 强制清除 iOS 默认白框特效 */
+        input, textarea, select {
             width: 100%; padding: 14px 16px; background-color: var(--input-bg);
             border: 1px solid #333; border-radius: 8px; font-size: 15px; color: var(--text-main);
             box-sizing: border-box; transition: all 0.3s ease; outline: none;
+            -webkit-appearance: none; 
+            appearance: none;
         }
-
         input:focus, textarea:focus, select:focus { border-color: var(--accent-color); box-shadow: 0 0 10px rgba(0, 210, 255, 0.2); }
         textarea { height: 120px; resize: none; }
+        
+        /* 针对下拉菜单单独补充一个箭头，因为 appearance: none 把自带箭头也清除了 */
+        select {
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a0a3b1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat; background-position: right 15px center; background-size: 16px;
+        }
 
         button {
             margin-top: 20px; padding: 14px 20px; background-color: var(--accent-color);
@@ -75,9 +83,9 @@
         .btn-export:hover { background-color: #33ffb3; box-shadow: 0 0 15px rgba(0, 255, 157, 0.4); }
         .btn-reset { background-color: #2c2f38; color: var(--text-main); flex: 1; }
         .btn-reset:hover { background-color: var(--error-color); color: white; box-shadow: 0 0 15px rgba(255, 85, 85, 0.4); }
-        
+        
         /* 智能搜索下拉框样式 */
-        .dropdown-container { position: relative; }
+        .dropdown-container { position: relative; width: 100%; }
         .dropdown-list {
             position: absolute; top: calc(100% + 8px); left: 0; width: 100%;
             background: #1a1d24; border: 1px solid rgba(0,210,255,0.3);
@@ -104,16 +112,16 @@
             display: flex; flex-direction: column;
         }
 
-        #preview-title { 
-            font-size: 36px; font-weight: bold; margin-bottom: 20px; 
-            color: #ffffff; text-shadow: 0 0 10px rgba(0, 210, 255, 0.8), 0 0 20px rgba(0, 210, 255, 0.4); 
+        #preview-title { 
+            font-size: 36px; font-weight: bold; margin-bottom: 20px; 
+            color: #ffffff; text-shadow: 0 0 10px rgba(0, 210, 255, 0.8), 0 0 20px rgba(0, 210, 255, 0.4); 
             text-align: center; line-height: 1.3;
         }
 
         #tmdb-meta-box { display: none; margin-bottom: 30px; text-align: center; }
-        
-        .poster-image { 
-            width: 100%; max-width: 320px; border-radius: 12px; margin: 0 auto 15px auto; 
+        
+        .poster-image { 
+            width: 100%; max-width: 320px; border-radius: 12px; margin: 0 auto 15px auto; 
             display: block; box-shadow: 0 8px 24px rgba(0, 210, 255, 0.25); border: 1px solid rgba(0, 210, 255, 0.3);
         }
 
@@ -122,8 +130,8 @@
         .rating { color: var(--warning-color); font-weight: bold; }
 
         #preview-review { line-height: 1.8; color: #d1d5db; white-space: pre-wrap; margin-bottom: 30px; flex-grow: 1; }
-        #preview-log { 
-            color: var(--accent-color); font-size: 12px; word-break: break-all; 
+        #preview-log { 
+            color: var(--accent-color); font-size: 12px; word-break: break-all; 
             border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 16px; margin-top: 20px; font-family: monospace; display: none;
         }
 
@@ -141,7 +149,7 @@
 
     <div class="panel controls">
         <h2>🎬 影评数据控制台</h2>
-        
+        
         <label>1. 输入 API Key (只需填一次)</label>
         <input type="password" id="input-api-key" placeholder="输入 TMDB API Key">
 
@@ -150,8 +158,8 @@
             <input type="text" id="input-title" placeholder="输入影视名称，然后点击下方搜索..." oninput="updateText()">
             <ul id="search-dropdown" class="dropdown-list"></ul>
         </div>
-        
-        <button onclick="fetchTMDBSearch()">🔍 搜索电影列表</button>
+        
+        <button id="btn-search" onclick="fetchTMDBSearch()">🔍 搜索电影列表</button>
 
         <hr style="margin: 30px 0; border: 0; border-top: 1px solid rgba(255,255,255,0.1);">
 
@@ -177,7 +185,7 @@
     <div class="preview-container">
         <div class="preview-box" id="capture-area">
             <div id="preview-title">等待输入信号...</div>
-            
+            
             <div id="tmdb-meta-box">
                 <div id="poster-container"></div>
                 <div class="meta-tags">
@@ -192,15 +200,23 @@
     </div>
 
     <script>
+        // 增加容错保护：防止在隐身模式/内置浏览器中调用 localStorage 崩溃
         window.onload = function() {
-            const savedKey = localStorage.getItem('my_tmdb_api_key');
-            if (savedKey) document.getElementById('input-api-key').value = savedKey;
+            try {
+                const savedKey = localStorage.getItem('my_tmdb_api_key');
+                if (savedKey) document.getElementById('input-api-key').value = savedKey;
+            } catch (e) {
+                console.warn("浏览器禁用了本地存储功能");
+            }
         };
 
+        // 修复事件冲突：加入对搜索按钮 (btn-search) 的判定排除
         document.addEventListener('click', function(event) {
             const dropdown = document.getElementById('search-dropdown');
             const input = document.getElementById('input-title');
-            if (event.target !== input && event.target !== dropdown && !dropdown.contains(event.target)) {
+            const searchBtn = document.getElementById('btn-search');
+            
+            if (event.target !== input && event.target !== dropdown && !dropdown.contains(event.target) && event.target !== searchBtn) {
                 dropdown.style.display = 'none';
             }
         });
@@ -216,11 +232,13 @@
             const title = document.getElementById('input-title').value;
             const apiKey = document.getElementById('input-api-key').value;
             const dropdown = document.getElementById('search-dropdown');
-            const logDiv = document.getElementById('preview-log');
-            
+            
             if (!title || !apiKey) return alert('请输入电影名称和 API Key！');
 
-            localStorage.setItem('my_tmdb_api_key', apiKey);
+            // 保存 Key 增加 try-catch 保护壳
+            try {
+                localStorage.setItem('my_tmdb_api_key', apiKey);
+            } catch (e) {}
 
             dropdown.innerHTML = '<li class="dropdown-item" style="justify-content:center; color:#a0a3b1;">🔄 正在搜索...</li>';
             dropdown.style.display = 'block';
@@ -230,20 +248,19 @@
             try {
                 const response = await fetch(url);
                 if (!response.ok) throw new Error(`HTTP 错误代码: ${response.status}`);
-                
+                
                 const data = await response.json();
-                
-                dropdown.innerHTML = ''; 
-                
+                dropdown.innerHTML = ''; 
+                
                 if (data.results && data.results.length > 0) {
                     const topResults = data.results.slice(0, 8);
-                    
+                    
                     topResults.forEach(movie => {
                         const li = document.createElement('li');
                         li.className = 'dropdown-item';
                         const year = movie.release_date ? movie.release_date.substring(0, 4) : '未知年份';
                         const posterSrc = movie.poster_path ? `https://image.tmdb.org/t/p/w92${movie.poster_path}` : 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
-                        
+                        
                         li.innerHTML = `
                             <img src="${posterSrc}" alt="thumb" onerror="this.style.opacity='0'">
                             <div class="dropdown-info">
@@ -251,7 +268,7 @@
                                 <span class="dropdown-desc">${year} | ⭐ ${movie.vote_average ? movie.vote_average.toFixed(1) : '暂无'}</span>
                             </div>
                         `;
-                        
+                        
                         li.onclick = () => selectMovie(movie);
                         dropdown.appendChild(li);
                     });
@@ -265,31 +282,31 @@
 
         function selectMovie(movie) {
             document.getElementById('search-dropdown').style.display = 'none';
-            document.getElementById('input-title').value = movie.title; 
-            
+            document.getElementById('input-title').value = movie.title; 
+            
             const posterContainer = document.getElementById('poster-container');
             const logDiv = document.getElementById('preview-log');
-            
+            
             document.getElementById('tmdb-meta-box').style.display = 'block';
-            posterContainer.innerHTML = ''; 
-            
+            posterContainer.innerHTML = ''; 
+            
             if (movie.poster_path) {
                 const img = document.createElement('img');
                 img.className = 'poster-image';
-                img.crossOrigin = 'anonymous'; 
+                img.crossOrigin = 'anonymous'; 
                 img.id = 'tmdb-poster-img';
                 img.src = `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
-                posterContainer.appendChild(img); 
+                posterContainer.appendChild(img); 
             }
 
             document.getElementById('meta-date').innerText = `📅 上映: ${movie.release_date || '未知'}`;
             document.getElementById('meta-rating').innerText = `⭐ 评分: ${movie.vote_average ? movie.vote_average.toFixed(1) : '暂无'}`;
-            
+            
             logDiv.style.display = 'block';
             logDiv.style.color = 'var(--accent-color)';
             logDiv.innerHTML = `> 精准匹配成功: ${movie.title} (ID: ${movie.id})`;
-            
-            updateText(); 
+            
+            updateText(); 
         }
 
         function exportPNG() {
@@ -299,17 +316,17 @@
 
             const captureArea = document.getElementById('capture-area');
 
-            html2canvas(captureArea, { 
-                scale: 3, 
-                backgroundColor: "#0f1115", 
-                useCORS: true, 
+            html2canvas(captureArea, { 
+                scale: 3, 
+                backgroundColor: "#0f1115", 
+                useCORS: true, 
                 allowTaint: false,
-                width: 600,  
-                height: 761, 
+                width: 600,  
+                height: 761, 
                 windowWidth: 600,
                 onclone: (clonedDoc) => {
                     const el = clonedDoc.getElementById('capture-area');
-                    
+                    
                     clonedDoc.body.innerHTML = '';
                     clonedDoc.body.style.margin = '0';
                     clonedDoc.body.style.padding = '0';
@@ -324,11 +341,11 @@
                     el.style.minHeight = '761px';
                     el.style.maxHeight = '761px';
                     el.style.margin = '0';
-                    el.style.borderRadius = '0'; 
+                    el.style.borderRadius = '0'; 
                     el.style.border = 'none';
-                    el.style.padding = '50px 40px'; 
+                    el.style.padding = '50px 40px'; 
                     el.style.boxSizing = 'border-box';
-                    el.style.overflow = 'hidden'; 
+                    el.style.overflow = 'hidden'; 
 
                     const poster = clonedDoc.getElementById('tmdb-poster-img');
                     if (poster) {
@@ -339,7 +356,7 @@
             }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = `我的影评海报_1800x2283.png`;
-                link.href = canvas.toDataURL('image/png', 1.0); 
+                link.href = canvas.toDataURL('image/png', 1.0); 
                 link.click();
             }).catch(e => {
                 alert("导出失败：" + e.message);
@@ -361,4 +378,3 @@
     </script>
 </body>
 </html>
-
